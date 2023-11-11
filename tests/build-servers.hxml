@@ -1,0 +1,6 @@
+--class-path .
+--library hxnodejs
+-D no-deprecation-warnings
+--library websockets
+--main servers.NodeJSNativeEchoServer
+--js build/nodejs/echo-server.js
