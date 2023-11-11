@@ -33,3 +33,7 @@ jobs:
         cd tests
         haxe build-servers.hxml
         cd ..
+        cd tests/build/nodejs
+        cp ../../package.json .
+        npm install
+        cd ../../..
