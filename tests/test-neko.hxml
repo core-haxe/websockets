@@ -1,0 +1,17 @@
+common.hxml
+
+--neko build/neko/test-all.n
+
+##########################################################
+# build echo server
+##########################################################
+--next
+--class-path .
+--library hxnodejs
+-D no-deprecation-warnings
+--library websockets
+--main servers.NodeJSNativeEchoServer
+--js build/nodejs/echo-server.js
+##########################################################
+
+--cmd neko .\build\neko\test-all.n  

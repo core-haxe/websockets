@@ -1,0 +1,7 @@
+--class-path .
+--main TestAll
+
+-lib utest
+-lib websockets
+
+-D no-deprecation-warnings

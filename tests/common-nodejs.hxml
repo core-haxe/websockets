@@ -1,0 +1,8 @@
+--class-path .
+--main TestAll
+
+--library utest
+--library websockets
+
+--library hxnodejs
+-D no-deprecation-warnings

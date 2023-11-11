@@ -1,0 +1,17 @@
+common-nodejs.hxml
+
+--js build/nodejs/test-all.js
+
+##########################################################
+# build echo server
+##########################################################
+--next
+--class-path .
+--library hxnodejs
+-D no-deprecation-warnings
+--library websockets
+--main servers.NodeJSNativeEchoServer
+--js build/nodejs/echo-server.js
+##########################################################
+
+--cmd node build/nodejs/test-all.js
