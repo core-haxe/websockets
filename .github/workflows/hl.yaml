@@ -20,6 +20,7 @@ jobs:
       haxe-version: ${{ matrix.haxe }}
       haxe-libs: |
         utest
+        hxnodejs
       test-hl:  tests/common.hxml --class-path tests
 
       before-tests: |
@@ -29,3 +30,10 @@ jobs:
         haxelib dev logging logging
         git clone https://github.com/core-haxe/websockets
         haxelib dev websockets websockets
+        cd tests
+        haxe build-servers.hxml
+        cd ..
+        cd tests/build/nodejs
+        cp ../../package.json .
+        npm install
+        cd ../../..

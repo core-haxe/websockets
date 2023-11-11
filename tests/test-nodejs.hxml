@@ -1,5 +1,6 @@
 common-nodejs.hxml
 
+-D local
 --js build/nodejs/test-all.js
 
 ##########################################################
