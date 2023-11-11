@@ -91,6 +91,7 @@ class NodeJSNativeEchoServer {
             _stop = false;
             _stopped = false;
             sys.thread.Thread.create(() -> {
+                trace(">>>>>>>>>>>>>>>>>>>>>> creating process: ", path);
                 var p = new Process("node", [path, "" + port]);
                 serverProcess = p;
                 while (!_stop) {
