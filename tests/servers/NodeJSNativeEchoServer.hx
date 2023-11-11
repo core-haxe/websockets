@@ -51,8 +51,14 @@ class NodeJSNativeEchoServer {
     public static function run(port:Int):Promise<Bool> {
         return new Promise((resolve, reject) -> {
 
+            #if local
+            var path = "build/nodejs/echo-server.js";
+            #else
+            var path = "tests/build/nodejs/echo-server.js";
+            #end
+
             #if nodejs
-            serverProcess = js.node.ChildProcess.spawn("node", ["build/nodejs/echo-server.js", "" + port]);
+            serverProcess = js.node.ChildProcess.spawn("node", [path, "" + port]);
             /*
             serverProcess.stdout.on("data", (data) -> {
                 if (StringTools.trim(Std.string(data)).length == 0) {
@@ -85,7 +91,7 @@ class NodeJSNativeEchoServer {
             _stop = false;
             _stopped = false;
             sys.thread.Thread.create(() -> {
-                var p = new Process("node", ["build/nodejs/echo-server.js", "" + port]);
+                var p = new Process("node", [path, "" + port]);
                 serverProcess = p;
                 while (!_stop) {
                     /*
