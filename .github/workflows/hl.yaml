@@ -37,3 +37,4 @@ jobs:
         cp ../../package.json .
         npm install
         cd ../../..
+        if [[ "${{ matrix.os }}" == ubuntu* ]]; then sudo apt-get -y install libpng-dev libturbojpeg-dev libvorbis-dev libopenal-dev libsdl2-dev libmbedtls-dev libuv1-dev; fi
