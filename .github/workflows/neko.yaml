@@ -30,4 +30,6 @@ jobs:
         haxelib dev logging logging
         git clone https://github.com/core-haxe/websockets
         haxelib dev websockets websockets
-        haxe tests/build-servers.hxml
+        cd tests
+        haxe build-servers.hxml
+        cd ..
