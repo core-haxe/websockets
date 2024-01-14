@@ -110,10 +110,19 @@ class NodeJSNativeEchoServer {
                 p.kill();
                 _stopped = true;
             });
-          
+
+            #if !jvm
+
             Timer.delay(() -> {
                 resolve(true);
             }, 100);
+
+            #else // timers dont work proprly on jvm :(
+
+            Sys.sleep(0.1);
+            resolve(true);
+
+            #end
 
             #else
 

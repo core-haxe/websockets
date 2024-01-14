@@ -1,13 +1,13 @@
 package cases;
 
 import haxe.io.Bytes;
-import haxe.Timer;
 import utest.Async;
 import servers.NodeJSNativeEchoServer;
 import utest.Assert;
 import utest.ITest;
 import ws.WebSocket;
 import ws.impl.Types.MessageType;
+import DebugUtils.*;
 
 @:timeout(2000)
 class TestClientWithNativeNodeServer implements ITest {
@@ -33,8 +33,14 @@ class TestClientWithNativeNodeServer implements ITest {
     }
 
     function testEcho(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testEcho");
+
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send("message to server");
         }
         client.onerror = (e) -> {
@@ -45,6 +51,8 @@ class TestClientWithNativeNodeServer implements ITest {
             switch (m) {
                 case StrMessage(content):
                     Assert.equals("echo: message to server", content);
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -53,6 +61,11 @@ class TestClientWithNativeNodeServer implements ITest {
     }
 
     function testEcho_Large(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testEcho_Large");
+
         var client = new WebSocket("ws://localhost:7072");
         var sb = new StringBuf();
         for (_ in 0...1024) {
@@ -60,6 +73,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var message = sb.toString();
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(message);
         }
         client.onerror = (e) -> {
@@ -70,6 +84,8 @@ class TestClientWithNativeNodeServer implements ITest {
             switch (m) {
                 case StrMessage(content):
                     Assert.equals("echo: " + message, content);
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -78,6 +94,11 @@ class TestClientWithNativeNodeServer implements ITest {
     }
 
     function testEcho_Huge(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testEcho_Huge");
+
         var client = new WebSocket("ws://localhost:7072");
         var sb = new StringBuf();
         for (_ in 0...10240) {
@@ -85,6 +106,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var message = sb.toString();
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(message);
         }
         client.onerror = (e) -> {
@@ -95,6 +117,8 @@ class TestClientWithNativeNodeServer implements ITest {
             switch (m) {
                 case StrMessage(content):
                     Assert.equals("echo: " + message, content);
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -104,6 +128,11 @@ class TestClientWithNativeNodeServer implements ITest {
 
     #if !cs // TODO: for some reason sending a huge buffer on cs seems to hang, it does get there _eventually_ but it takes ages (look at socket.flush in haxe maybe?)
     function testEcho_Massive(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testEcho_Massive");
+
         var client = new WebSocket("ws://localhost:7072");
         var sb = new StringBuf();
         for (_ in 0...102400) {
@@ -111,6 +140,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var message = sb.toString();
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(message);
         }
         client.onerror = (e) -> {
@@ -121,6 +151,8 @@ class TestClientWithNativeNodeServer implements ITest {
             switch (m) {
                 case StrMessage(content):
                     Assert.equals("echo: " + message, content);
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -130,8 +162,14 @@ class TestClientWithNativeNodeServer implements ITest {
     #end
 
     function testBinary(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testBinary");
+
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(Bytes.ofString("this is a binary message"));
         }
         client.onerror = (e) -> {
@@ -145,6 +183,8 @@ class TestClientWithNativeNodeServer implements ITest {
                     async.done();
                 case BytesMessage(content):
                     Assert.equals(Bytes.ofString("this is a binary message").toString(), content.toString());
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -153,6 +193,11 @@ class TestClientWithNativeNodeServer implements ITest {
     }
 
     function testBinary_Random(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testBinary_Random");
+
         var size = 1024;
         var randomBytes = Bytes.alloc(size);
         for (i in 0...size) {
@@ -160,6 +205,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(randomBytes);
         }
         client.onerror = (e) -> {
@@ -178,6 +224,8 @@ class TestClientWithNativeNodeServer implements ITest {
                             Assert.fail("bytes not equal"); // we are doing it this way so we dont have 1000s of traces
                         }
                     }
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -187,6 +235,11 @@ class TestClientWithNativeNodeServer implements ITest {
 
     #if !cs // TODO: for some reason sending a huge buffer on cs seems to hang, it does get there _eventually_ but it takes ages (look at socket.flush in haxe maybe?)
     function testBinary_Random_Huge(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testBinary_Random_Huge");
+
         var size = 102400;
         var randomBytes = Bytes.alloc(size);
         for (i in 0...size) {
@@ -194,6 +247,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(randomBytes);
         }
         client.onerror = (e) -> {
@@ -212,6 +266,8 @@ class TestClientWithNativeNodeServer implements ITest {
                             Assert.fail("bytes not equal"); // we are doing it this way so we dont have 1000s of traces
                         }
                     }
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -222,6 +278,11 @@ class TestClientWithNativeNodeServer implements ITest {
 
     #if !cs // TODO: for some reason sending a huge buffer on cs seems to hang, it does get there _eventually_ but it takes ages (look at socket.flush in haxe maybe?)
     function testBinary_Random_Massive(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testBinary_Random_Massive");
+
         var size = 1024000;
         var randomBytes = Bytes.alloc(size);
         for (i in 0...size) {
@@ -229,6 +290,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(randomBytes);
         }
         client.onerror = (e) -> {
@@ -247,6 +309,8 @@ class TestClientWithNativeNodeServer implements ITest {
                             Assert.fail("bytes not equal"); // we are doing it this way so we dont have 1000s of traces
                         }
                     }
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -256,6 +320,11 @@ class TestClientWithNativeNodeServer implements ITest {
     #end
 
     function testBinary_Random_With_Zeros(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testBinary_Random_With_Zeros");
+
         var size = 1024;
         var randomBytes = Bytes.alloc(size);
         for (i in 0...size) {
@@ -267,6 +336,7 @@ class TestClientWithNativeNodeServer implements ITest {
         }
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.send(randomBytes);
         }
         client.onerror = (e) -> {
@@ -285,6 +355,8 @@ class TestClientWithNativeNodeServer implements ITest {
                             Assert.fail("bytes not equal"); // we are doing it this way so we dont have 1000s of traces
                         }
                     }
+                    printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+                    printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
                     client.close();
                     async.done();
                 case _:   
@@ -293,8 +365,14 @@ class TestClientWithNativeNodeServer implements ITest {
     }
 
     function testClientClose(async:Async) {
+        var start1 = Sys.time();
+        var start2 = Sys.time();
+
+        printHeader("testClientClose");
+
         var client = new WebSocket("ws://localhost:7072");
         client.onopen = () -> {
+            start2 = Sys.time();
             client.close();
         }
         client.onerror = (e) -> {
@@ -302,6 +380,8 @@ class TestClientWithNativeNodeServer implements ITest {
             async.done();
         }
         client.onclose = () -> {
+            printRow("messaging took", Math.round((Sys.time() - start2) * 1000));
+            printRow("total test took", Math.round((Sys.time() - start1) * 1000), true);
             Assert.equals(1, 1);
             async.done();
         }

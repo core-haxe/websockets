@@ -1,7 +1,8 @@
---class-path .
---main TestAll
-
 -lib utest
 -lib websockets
+
+--main TestAll
+
+--class-path .
 
 -D no-deprecation-warnings

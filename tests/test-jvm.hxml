@@ -1,0 +1,19 @@
+-D no_timer
+common.hxml
+
+-D local
+--jvm build/jvm/TestAll.jar
+
+##########################################################
+# build echo server
+##########################################################
+--next
+--class-path .
+--library hxnodejs
+-D no-deprecation-warnings
+--library websockets
+--main servers.NodeJSNativeEchoServer
+--js build/nodejs/echo-server.js
+##########################################################
+
+--cmd java -jar build/jvm/TestAll.jar

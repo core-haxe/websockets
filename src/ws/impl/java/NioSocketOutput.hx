@@ -14,7 +14,8 @@ class NioSocketOutput extends BytesOutput {
     }
 
     public override function flush() {
-        var buffer = ByteBuffer.wrap(getBytes().getData());
+        var bytes = getBytes();
+        var buffer = ByteBuffer.wrap(bytes.getData());
         socket.channel.write(buffer);
         buffer.clear();
         b = new BytesBuffer();

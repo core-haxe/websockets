@@ -139,9 +139,13 @@ processLoop(this);
     private function processLoop(ws:WebSocket) {
         while (ws.state != State.Closed) { // TODO: should think about mutex
             //trace(ws.state);
-            MainLoop.runInMainThread(ws.process);
+            #if jvm // no main event loop in jvm :(
+                ws.process();
+            #else
+                MainLoop.runInMainThread(ws.process);
+            #end
             //ws.process();
-            Sys.sleep(.01);
+            Sys.sleep(0);
         }
     }
 
@@ -160,7 +164,7 @@ processLoop(this);
         httpRequest.httpVersion = "HTTP/1.1";
 
         httpRequest.headers.set(HttpHeader.HOST, _host + ":" + _port);
-        httpRequest.headers.set(HttpHeader.USER_AGENT, "hxWebSockets");
+        httpRequest.headers.set(HttpHeader.USER_AGENT, "haxeui-core/websockets");
         httpRequest.headers.set(HttpHeader.SEC_WEBSOSCKET_VERSION, "13");
         httpRequest.headers.set(HttpHeader.UPGRADE, "websocket");
         httpRequest.headers.set(HttpHeader.CONNECTION, "Upgrade");

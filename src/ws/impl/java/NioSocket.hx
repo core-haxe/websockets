@@ -18,6 +18,101 @@ class NioSocket {
     public var input(default,null) : haxe.io.Input;
     public var output(default,null) : haxe.io.Output;
 
+    private var _host:Host = null;
+    private var _port:Int = -1;
+
+    private var selector:Selector;
+    private var _clientSocket:SocketChannel = null;
+
+    public function new() {
+    }
+
+    public function connect(host:Host, port:Int):Void {
+        _host = host;
+        _port = port;
+        this.selector = Selector.open();
+        var socketAddress = new InetSocketAddress(host.wrapped, port);
+        _clientSocket = SocketChannel.open(socketAddress);
+        _clientSocket.configureBlocking(false);
+        this.output = new NioSocketOutput(this);
+        this.input = new NioSocketInput(this);
+        _clientSocket.register(selector, SelectionKey.OP_READ);
+    }
+
+    public var channel(get, null):SocketChannel;
+    private function get_channel():SocketChannel {
+        return _clientSocket;
+    }
+
+    public function host():{host:Host, port:Int} {
+        return {host: _host, port: _port};
+    }
+
+    public function close():Void {
+        if (_clientSocket != null) {
+            _clientSocket.close();
+            _clientSocket = null;
+        }
+    }
+
+    public function setTimeout(timeout:Float):Void {
+    }
+
+    public function setBlocking(b:Bool):Void {
+    }
+
+    public static function select(read:Array<NioSocket>, write:Array<NioSocket>, others:Array<NioSocket>, ?timeout:Float) : { read:Array<NioSocket>, write:Array<NioSocket>, others:Array<NioSocket> } {
+        if (write != null && write.length > 0) {
+            throw "Not implemented";
+        }
+        if (others != null && others.length > 0) {
+            throw "Not implemented";
+        }
+
+        var ret = null;
+        if (read != null && read.length > 0) {
+            for (r in read) {
+                if (r.selector.select(timeout) > 0) {
+                    var selectedKeys = r.selector.selectedKeys();
+                    var iterator = selectedKeys.iterator();
+                    while (iterator.hasNext()) {
+                        var key = cast(iterator.next(), SelectionKey);
+                        iterator.remove();
+                        if (key.isReadable()) {
+                            if (ret == null) {
+                                ret = {
+                                    read: [],
+                                    write: null,
+                                    others: null
+                                }
+                            }
+                            ret.read.push(r);
+                            var buffer = ByteBuffer.allocate(1024);
+                            var bytesRead = r.channel.read(buffer);
+                            if (bytesRead == -1) {
+                                r.channel.close();
+                                key.cancel();
+                                throw "Blocking"; // not really the right thing to throw
+                            }
+                            var copy:NativeArray<Int8> = new NativeArray(bytesRead);
+                            System.arraycopy(buffer.array(), 0, copy, 0, bytesRead);
+                            cast(r.input, NioSocketInput).pipedOutputStream.write(copy, 0, bytesRead);
+                        }
+                    }
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    /*
+
+    KEEPING THE ORIGINAL hxWebSockets impl here for a bit for reference, since it will be useful for the server impl
+
+    public var input(default,null) : haxe.io.Input;
+    public var output(default,null) : haxe.io.Output;
+
     public var custom : Dynamic;
 
     private var sock:java.net.Socket;
@@ -30,6 +125,7 @@ class NioSocket {
     private var boundAddr:SocketAddress;
 
     public function new(isClient:Bool = false):Void {
+        trace(">>>>>>>>>>>>>>>>>>>>>>>>>>>> IS CLIENT", isClient);
     }
 
     private function createServer():Void {
@@ -59,10 +155,8 @@ class NioSocket {
 
     public function connect(host:Host, port:Int):Void {
         sock.connect(new InetSocketAddress(host.wrapped, port));
-        /*
-        this.output = new java.io.NativeOutput(sock.getOutputStream());
-        this.input = new java.io.NativeInput(sock.getInputStream());
-        */
+        //this.output = new java.io.NativeOutput(sock.getOutputStream());
+        //this.input = new java.io.NativeInput(sock.getInputStream());
     }
 
     public function listen(connections:Int):Void {
@@ -185,4 +279,5 @@ class NioSocket {
 
         return ret;
     }
+    */
 }
