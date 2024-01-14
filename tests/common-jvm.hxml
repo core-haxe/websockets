@@ -1,0 +1,10 @@
+-D no_timer
+
+-lib utest
+-lib websockets
+
+--main TestAll
+
+--class-path .
+
+-D no-deprecation-warnings
