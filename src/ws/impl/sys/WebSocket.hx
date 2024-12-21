@@ -85,44 +85,44 @@ class WebSocket extends WebSocketBase {
 
         #if !cs
 
+        #if websockets_threaded
+
         _processThread = Thread.create(processThread);
         _processThread.sendMessage(this);
 
-        /*
-        haxe.MainLoop.addThread(function() {
-            //Log.debug("Thread started", this.id);
-            processLoop(this);
-            //Log.debug("Thread ended", this.id);
+        #else
+
+        var event:haxe.MainLoop.MainEvent = null;
+        event = haxe.MainLoop.add(() -> {
+            if (this.state != State.Closed) { // TODO: should think about mutex
+                this.process();
+            } else {
+                event.stop();
+            }
         });
-        */
-        /*
-        haxe.MainLoop.add(function() {
-//trace("running");
-processLoop(this);
-        });
-        */
+
+        #end
 
         #else
 
-
-        //_processThread = Thread.create(processThread);
-        //_processThread.sendMessage(this);
+        #if websockets_threaded
 
         haxe.MainLoop.addThread(function() {
-            //Log.debug("Thread started", this.id);
             processLoop(this);
-            //Log.debug("Thread ended", this.id);
-
-            
-            //while (this.state != State.Closed) { // TODO: should think about mutex
-                //trace(ws.state);
-                //MainLoop.runInMainThread(ws.process);
-                //this.process();
-                //Sys.sleep(.01);
-            //}
-            
-    
         });
+
+        #else
+
+        var event:haxe.MainLoop.MainEvent = null;
+        event = haxe.MainLoop.add(() -> {
+            if (this.state != State.Closed) { // TODO: should think about mutex
+                this.process();
+            } else {
+                event.stop();
+            }
+        });
+
+        #end
 
         #end
 
@@ -130,15 +130,12 @@ processLoop(this);
     }
 
     private function processThread() {
-        //Log.debug("Thread started", this.id);
         var ws:WebSocket = Thread.readMessage(true);
         processLoop(this);
-        //Log.debug("Thread ended", this.id);
     }
 
     private function processLoop(ws:WebSocket) {
         while (ws.state != State.Closed) { // TODO: should think about mutex
-            //trace(ws.state);
             #if jvm // no main event loop in jvm :(
                 ws.process();
             #else
