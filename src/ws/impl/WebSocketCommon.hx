@@ -62,6 +62,7 @@ class WebSocketCommon {
     private var _lastPong:Date = null;
 
     private function handleData() {
+        trace("handleData");
         switch (state) {
             case State.Head:
                 if (_buffer.available < 2) return;
@@ -236,9 +237,9 @@ class WebSocketCommon {
         if (result != null && needClose == false) {
             if (result.read.length > 0) {
                 var read = 0;
+                var data = Bytes.alloc(1024);
                 try {
                     while (true) {
-                        var data = Bytes.alloc(1024);
                         read = _socket.input.readBytes(data, 0, data.length);
                         if (read <= 0){
                             break;
