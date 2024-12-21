@@ -236,7 +236,7 @@ class WebSocketCommon {
         if (result != null && needClose == false) {
             if (result.read.length > 0) {
                 var read = 0;
-                var data = Bytes.alloc(1024);
+                var data = Bytes.alloc(Defines.bufferSize());
                 try {
                     #if hard_loop
                     while (true) {
