@@ -53,7 +53,6 @@ class WebSocket extends WebSocketBase {
 
     private function createSocket():Socket {
         if (_protocol == "wss") {
-            /*
             #if (java || cs)
                 throw "Secure sockets not implemented";
             #else
@@ -62,8 +61,6 @@ class WebSocket extends WebSocketBase {
                 }
                 return new SecureSocket();
             #end
-            */
-            throw "todo wss";
         } else if (_protocol == "ws") {
             if (_port == 0) {
                 _port = 80;
